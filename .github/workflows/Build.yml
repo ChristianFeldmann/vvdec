@@ -14,19 +14,34 @@ jobs:
         include:
           # - os: ubuntu-16.04
           - os: ubuntu-18.04
+            OUTPUT_LIB: libvvdec.so
           - os: ubuntu-20.04
           - os: macos-10.15
-          - os: windows-2019
+            OUTPUT_LIB: libvvdec.dylib
     steps:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow
-    - name: Build Linux / mac
+    - name: Build
       run: |
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
         make -j$(nproc)
-      if: matrix.os != 'windows-2019'
+        ls -l
+        ls -l bin
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.OUTPUT_LIB}}
+        path: lib/${{matrix.OUTPUT_LIB}}
+      if: matrix.os != 'ubuntu-20.04'
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+    steps:
     - name: Build Windows
       run: |
         mkdir build
@@ -35,4 +50,9 @@ jobs:
         cmake .. -DCMAKE_BUILD_TYPE=Release
         msbuild vvdec.sln
       shell: cmd
-      if: matrix.os == 'windows-2019'
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vvdec.dll
+        path: lib/vvdec.dll
+      if: matrix.os != 'ubuntu-20.04'
