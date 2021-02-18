@@ -27,6 +27,7 @@ jobs:
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
         make -j$(nproc)
+        cd ..
         ls -l
         ls -l bin
     - name: Upload Artifact
@@ -44,11 +45,13 @@ jobs:
     steps:
     - name: Build Windows
       run: |
+        dir
         mkdir build
         cd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cmake .. -DCMAKE_BUILD_TYPE=Release
         msbuild vvdec.sln
+        cd ..
       shell: cmd
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
