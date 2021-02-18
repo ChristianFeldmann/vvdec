@@ -1,0 +1,63 @@
+name: CI build
+
+on:
+  push:
+  release:
+    types:
+      - created
+
+jobs:
+  build-linux-mac:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # - os: ubuntu-16.04
+          - os: ubuntu-18.04
+            OUTPUT_LIB: libvvdec.so
+          - os: ubuntu-20.04
+          - os: macos-10.15
+            OUTPUT_LIB: libvvdec.dylib
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+        cd ..
+        ls -l
+        ls -l bin
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.OUTPUT_LIB}}
+        path: lib/release-static/${{matrix.OUTPUT_LIB}}
+      if: matrix.os != 'ubuntu-20.04'
+  build-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
+    - name: Build Windows
+      run: |
+        mkdir build
+        cd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        msbuild vvdec.sln
+        cd ..
+        dir
+      shell: cmd
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vvdec.dll
+        path: lib/vvdec.dll
+      if: matrix.os != 'ubuntu-20.04'
