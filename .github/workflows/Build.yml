@@ -7,7 +7,7 @@ on:
       - created
 
 jobs:
-  build:
+  build-linux-mac:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -35,7 +35,7 @@ jobs:
         name: ${{matrix.OUTPUT_LIB}}
         path: lib/${{matrix.OUTPUT_LIB}}
       if: matrix.os != 'ubuntu-20.04'
-  build:
+  build-windows:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
