@@ -34,7 +34,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{matrix.OUTPUT_LIB}}
-        path: lib/${{matrix.OUTPUT_LIB}}
+        path: lib/release-static/${{matrix.OUTPUT_LIB}}
       if: matrix.os != 'ubuntu-20.04'
   build-windows:
     runs-on: ${{ matrix.os }}
