@@ -43,15 +43,17 @@ jobs:
         include:
           - os: windows-2019
     steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
     - name: Build Windows
       run: |
-        dir
         mkdir build
         cd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cmake .. -DCMAKE_BUILD_TYPE=Release
         msbuild vvdec.sln
         cd ..
+        dir
       shell: cmd
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
