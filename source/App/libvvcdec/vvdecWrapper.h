@@ -46,17 +46,17 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "libvvcdec.h"
+#include "libvvdec.h"
 #include "vvdec/vvdec.h"
 
-namespace libvvcdec
+namespace libvvdec
 {
 
-class vvcDecoderWrapper
+class vvdecoderWrapper
 {
 public:
-  vvcDecoderWrapper();
-  ~vvcDecoderWrapper();
+  vvdecoderWrapper();
+  ~vvdecoderWrapper();
   
   int init();
   
@@ -67,20 +67,20 @@ public:
   bool gotFrame() const;
   vvdec::Frame* getFrame() const;
   
-  void setLogging(libvvcdec_logging_callback callback, void *userData, libvvcdec_loglevel level);
+  void setLogging(libvvdec_logging_callback callback, void *userData, libvvdec_loglevel level);
 
 private:
   void unrefCurrentFrame();
   void closeDecoder();
-  void logMessage(std::string msg, libvvcdec_loglevel level);
+  void logMessage(std::string msg, libvvdec_loglevel level);
 
   vvdec::VVDec cVVDec;
   vvdec::AccessUnit cAccessUnit;
   vvdec::Frame* pcFrame {nullptr};
   bool flushing {false};
   bool isEnd {false};
-  libvvcdec_logging_callback loggingCallback {};
-  libvvcdec_loglevel loglevel{LIBVVCDEC_LOGLEVEL_SILENT};
+  libvvdec_logging_callback loggingCallback {};
+  libvvdec_loglevel loglevel{LIBvvdec_LOGLEVEL_SILENT};
   void *loggingUserData {};
 };
 

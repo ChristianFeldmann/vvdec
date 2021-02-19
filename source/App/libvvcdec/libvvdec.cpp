@@ -44,31 +44,31 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-#include "libvvcdec.h"
+#include "libvvdec.h"
 
 #include "vvdec/version.h"
-#include "vvcDecoderWrapper.h"
+#include "vvdecWrapper.h"
 
 namespace
 {
 
-unsigned getComponentIndex(libvvcdec_ColorComponent c)
+unsigned getComponentIndex(libvvdec_ColorComponent c)
 {
-  return (c == LIBVVCDEC_CHROMA_U) ? 1 : (c == LIBVVCDEC_CHROMA_V ? 2 : 0);
+  return (c == LIBvvdec_CHROMA_U) ? 1 : (c == LIBvvdec_CHROMA_V ? 2 : 0);
 }
 
 }
 
 extern "C" {
 
-  VVCDECAPI const char *libvvcdec_get_version(void)
+  vvdecAPI const char *libvvdec_get_version(void)
   {
     return VVDEC_VERSION;
   }
 
-  VVCDECAPI libvvcdec_context* libvvcdec_new_decoder(void)
+  vvdecAPI libvvdec_context* libvvdec_new_decoder(void)
   {
-    auto decCtx = new libvvcdec::vvcDecoderWrapper();
+    auto decCtx = new libvvdec::vvdecoderWrapper();
     if (!decCtx)
     {
       return nullptr;
@@ -82,39 +82,39 @@ extern "C" {
       return nullptr;
     }
 
-    return (libvvcdec_context*)decCtx;
+    return (libvvdec_context*)decCtx;
   }
 
-  VVCDECAPI libvvcdec_error libvvcdec_set_logging_callback(libvvcdec_context* decCtx, libvvcdec_logging_callback callback, void *userData, libvvcdec_loglevel loglevel)
+  vvdecAPI libvvdec_error libvvdec_set_logging_callback(libvvdec_context* decCtx, libvvdec_logging_callback callback, void *userData, libvvdec_loglevel loglevel)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !callback)
     {
-      return LIBVVCDEC_ERROR;
+      return LIBvvdec_ERROR;
     }
 
     d->setLogging(callback, userData, loglevel);
-    return LIBVVCDEC_OK;
+    return LIBvvdec_OK;
   }
 
-  VVCDECAPI libvvcdec_error libvvcdec_free_decoder(libvvcdec_context* decCtx)
+  vvdecAPI libvvdec_error libvvdec_free_decoder(libvvdec_context* decCtx)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d)
     {
-      return LIBVVCDEC_ERROR;
+      return LIBvvdec_ERROR;
     }
 
     delete d;
-    return LIBVVCDEC_OK;
+    return LIBvvdec_OK;
   }
 
-  VVCDECAPI libvvcdec_error libvvcdec_push_nal_unit(libvvcdec_context *decCtx, const unsigned char* data8, int length, bool &checkOutputPictures)
+  vvdecAPI libvvdec_error libvvdec_push_nal_unit(libvvdec_context *decCtx, const unsigned char* data8, int length, bool &checkOutputPictures)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d)
     {
-      return LIBVVCDEC_ERROR;
+      return LIBvvdec_ERROR;
     }
 
     int iRet = 0;
@@ -123,32 +123,32 @@ extern "C" {
       iRet = d->flush();
       if( iRet != vvdec::VVDEC_OK && iRet != vvdec::VVDEC_EOF )
       {
-        return LIBVVCDEC_ERROR;
+        return LIBvvdec_ERROR;
       }
     }
     else
     {
       if (!d->setAUData(data8, length))
       {
-        return LIBVVCDEC_ERROR;
+        return LIBvvdec_ERROR;
       }
 
       iRet = d->decode();
 
       if (iRet != vvdec::VVDEC_OK && iRet != vvdec::VVDEC_TRY_AGAIN)
       {
-        return LIBVVCDEC_ERROR;
+        return LIBvvdec_ERROR;
       }
     }
 
     checkOutputPictures = iRet != vvdec::VVDEC_TRY_AGAIN && d->gotFrame();
 
-    return LIBVVCDEC_OK;
+    return LIBvvdec_OK;
   }
 
-  VVCDECAPI uint64_t libvvcdec_get_picture_POC(libvvcdec_context *decCtx)
+  vvdecAPI uint64_t libvvdec_get_picture_POC(libvvdec_context *decCtx)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
@@ -157,9 +157,9 @@ extern "C" {
     return d->getFrame()->m_uiSequenceNumber;
   }
 
-  VVCDECAPI uint32_t libvvcdec_get_picture_width(libvvcdec_context *decCtx, libvvcdec_ColorComponent c)
+  vvdecAPI uint32_t libvvdec_get_picture_width(libvvdec_context *decCtx, libvvdec_ColorComponent c)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
@@ -175,9 +175,9 @@ extern "C" {
     return f->m_cComponent[idx].m_uiWidth;
   }
 
-  VVCDECAPI uint32_t libvvcdec_get_picture_height(libvvcdec_context *decCtx, libvvcdec_ColorComponent c)
+  vvdecAPI uint32_t libvvdec_get_picture_height(libvvdec_context *decCtx, libvvdec_ColorComponent c)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
@@ -193,9 +193,9 @@ extern "C" {
     return f->m_cComponent[idx].m_uiHeight;
   }
 
-  VVCDECAPI int32_t libvvcdec_get_picture_stride(libvvcdec_context *decCtx, libvvcdec_ColorComponent c)
+  vvdecAPI int32_t libvvdec_get_picture_stride(libvvdec_context *decCtx, libvvdec_ColorComponent c)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
@@ -211,9 +211,9 @@ extern "C" {
     return f->m_cComponent[idx].m_iStride;
   }
 
-  VVCDECAPI unsigned char* libvvcdec_get_picture_plane(libvvcdec_context *decCtx, libvvcdec_ColorComponent c)
+  vvdecAPI unsigned char* libvvdec_get_picture_plane(libvvdec_context *decCtx, libvvdec_ColorComponent c)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
@@ -229,33 +229,33 @@ extern "C" {
     return f->m_cComponent[idx].m_pucBuffer;
   }
 
-  VVCDECAPI libvvcdec_ChromaFormat libvvcdec_get_picture_chroma_format(libvvcdec_context *decCtx)
+  vvdecAPI libvvdec_ChromaFormat libvvdec_get_picture_chroma_format(libvvdec_context *decCtx)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
-      return LIBVVCDEC_CHROMA_UNKNOWN;
+      return LIBvvdec_CHROMA_UNKNOWN;
     }
 
     auto f = d->getFrame();
     switch (f->m_eColorFormat)
     {
     case vvdec::VVC_CF_YUV400_PLANAR:
-      return LIBVVCDEC_CHROMA_400;
+      return LIBvvdec_CHROMA_400;
     case vvdec::VVC_CF_YUV420_PLANAR:
-      return LIBVVCDEC_CHROMA_420;
+      return LIBvvdec_CHROMA_420;
     case vvdec::VVC_CF_YUV422_PLANAR:
-      return LIBVVCDEC_CHROMA_422;
+      return LIBvvdec_CHROMA_422;
     case vvdec::VVC_CF_YUV444_PLANAR:
-      return LIBVVCDEC_CHROMA_444;
+      return LIBvvdec_CHROMA_444;
     default:
-      return LIBVVCDEC_CHROMA_UNKNOWN;
+      return LIBvvdec_CHROMA_UNKNOWN;
     }
   }
 
-  VVCDECAPI uint32_t libvvcdec_get_picture_bit_depth(libvvcdec_context *decCtx, libvvcdec_ColorComponent c)
+  vvdecAPI uint32_t libvvdec_get_picture_bit_depth(libvvdec_context *decCtx, libvvdec_ColorComponent c)
   {
-    auto d = (libvvcdec::vvcDecoderWrapper*)decCtx;
+    auto d = (libvvdec::vvdecoderWrapper*)decCtx;
     if (!d || !d->gotFrame())
     {
       return 0;
