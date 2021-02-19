@@ -58,5 +58,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: vvdec.dll
+        name: vvdecLib.dll
         path: bin/release-static/vvdecLib.dll
