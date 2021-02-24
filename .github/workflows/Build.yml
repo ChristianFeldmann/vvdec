@@ -7,32 +7,56 @@ on:
       - created
 
 jobs:
-  build:
+  build-linux-mac:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           # - os: ubuntu-16.04
           - os: ubuntu-18.04
+            OUTPUT_LIB: libvvdecLib.so
           - os: ubuntu-20.04
           - os: macos-10.15
-          - os: windows-2019
+            OUTPUT_LIB: libvvdecLib.dylib
     steps:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow
-    - name: Build Linux / mac
+    - name: Build
       run: |
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
         make -j$(nproc)
-      if: matrix.os != 'windows-2019'
+        cd ..
+        ls -l
+        ls -l bin
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.OUTPUT_LIB}}
+        path: lib/release-static/${{matrix.OUTPUT_LIB}}
+      if: matrix.os != 'ubuntu-20.04'
+  build-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - run: git fetch --prune --unshallow
     - name: Build Windows
       run: |
         mkdir build
         cd build
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         cmake .. -DCMAKE_BUILD_TYPE=Release
-        msbuild vvdec.sln
+        msbuild vvdec.sln /p:Configuration=Release
+        cd ..
+        dir
       shell: cmd
-      if: matrix.os == 'windows-2019'
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: vvdecLib.dll
+        path: bin/release-static/vvdecLib.dll
