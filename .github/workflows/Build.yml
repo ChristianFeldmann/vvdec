@@ -36,6 +36,16 @@ jobs:
         name: ${{matrix.OUTPUT_LIB}}
         path: lib/release-static/${{matrix.OUTPUT_LIB}}
       if: matrix.os != 'ubuntu-20.04'
+    - name: Upload Release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: lib/release-static/${{matrix.OUTPUT_LIB}}
+        asset_name: ${{matrix.OUTPUT_LIB}}
+        asset_content_type: application/library
+      if: github.event_name == 'release' && matrix.os != 'ubuntu-20.04'
   build-windows:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -60,3 +70,13 @@ jobs:
       with:
         name: vvdecLib.dll
         path: bin/release-static/vvdecLib.dll
+    - name: Upload Release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: bin/release-static/vvdecLib.dll
+        asset_name: vvdecLib.dll
+        asset_content_type: application/library
+      if: github.event_name == 'release'
